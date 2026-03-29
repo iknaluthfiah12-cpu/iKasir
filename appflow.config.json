@@ -1,3 +1,7 @@
 {
-  "platform": "capacitor"
+  "npmClient": "npm",
+  "platform": "capacitor",
+  "android": {
+    "type": "capacitor"
+  }
 }
