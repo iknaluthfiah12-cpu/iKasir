@@ -1,0 +1,91 @@
+/* ─── iKasir Theme Variables ──────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --ik-green:        #1D9E75;
+  --ik-green-dark:   #0F6E56;
+  --ik-green-light:  #E1F5EE;
+  --ik-green-mid:    #9FE1CB;
+  --ik-red:          #E24B4A;
+  --ik-red-light:    #FCEBEB;
+  --ik-amber:        #BA7517;
+  --ik-amber-light:  #FAEEDA;
+  --ik-blue:         #185FA5;
+  --ik-blue-light:   #E6F1FB;
+  --ik-purple:       #7C3AED;
+  --ik-purple-light: #EDE9FE;
+
+  /* Ionic overrides */
+  --ion-color-primary:           #1D9E75;
+  --ion-color-primary-rgb:       29, 158, 117;
+  --ion-color-primary-contrast:  #ffffff;
+  --ion-color-primary-shade:     #0F6E56;
+  --ion-color-primary-tint:      #34b589;
+
+  --ion-color-secondary:         #185FA5;
+  --ion-color-secondary-rgb:     24, 95, 165;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade:   #154f8a;
+  --ion-color-secondary-tint:    #2f71b3;
+
+  --ion-color-danger:            #E24B4A;
+  --ion-color-danger-rgb:        226, 75, 74;
+  --ion-color-danger-contrast:   #ffffff;
+  --ion-color-danger-shade:      #c74241;
+  --ion-color-danger-tint:       #e55d5c;
+
+  --ion-color-warning:           #BA7517;
+  --ion-color-warning-rgb:       186, 117, 23;
+  --ion-color-warning-contrast:  #ffffff;
+  --ion-color-warning-shade:     #a46614;
+  --ion-color-warning-tint:      #c1832e;
+
+  --ion-background-color:        #f0f4f0;
+  --ion-background-color-rgb:    240, 244, 240;
+  --ion-text-color:              #2c2c2a;
+  --ion-text-color-rgb:          44, 44, 42;
+
+  --ion-toolbar-background:      #1D9E75;
+  --ion-toolbar-color:           #ffffff;
+
+  --ion-tab-bar-background:      #ffffff;
+  --ion-tab-bar-border-color:    #e8e6df;
+  --ion-tab-bar-color:           #888780;
+  --ion-tab-bar-color-selected:  #1D9E75;
+
+  --ion-item-background:         #ffffff;
+  --ion-card-background:         #ffffff;
+
+  /* Typography */
+  --ion-font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+
+  /* Borders & Radius */
+  --ik-radius-sm: 8px;
+  --ik-radius:    12px;
+  --ik-radius-lg: 18px;
+  --ik-radius-xl: 24px;
+
+  /* Spacing */
+  --ik-gap-sm:  8px;
+  --ik-gap:     14px;
+  --ik-gap-lg:  20px;
+
+  /* Shadows */
+  --ik-shadow-sm: 0 1px 4px rgba(0,0,0,0.08);
+  --ik-shadow:    0 4px 16px rgba(0,0,0,0.1);
+  --ik-shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+
+  /* Safe area */
+  --ion-safe-area-top:    env(safe-area-inset-top);
+  --ion-safe-area-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dark mode (optional) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #1a1f1a;
+    --ion-text-color: #f0f0ee;
+    --ion-item-background: #252b25;
+    --ion-card-background: #252b25;
+    --ion-tab-bar-background: #1e231e;
+  }
+}

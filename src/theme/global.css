@@ -1,0 +1,184 @@
+/* ─── iKasir Global Styles ────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ionic component tweaks */
+ion-toolbar {
+  --background: var(--ik-green);
+  --color: #fff;
+  --border-width: 0;
+}
+
+ion-tab-bar {
+  height: 62px;
+  padding-bottom: max(var(--ion-safe-area-bottom, 0px), 4px);
+  border-top: 1px solid #e8e6df;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+}
+
+ion-tab-button {
+  --color: #888780;
+  --color-selected: var(--ik-green);
+}
+
+ion-tab-button ion-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+ion-card {
+  border-radius: var(--ik-radius-lg);
+  box-shadow: var(--ik-shadow-sm);
+  margin: 8px 0;
+}
+
+ion-item {
+  --border-radius: var(--ik-radius);
+  --padding-start: 14px;
+  --inner-padding-end: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+ion-button {
+  --border-radius: var(--ik-radius);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: none;
+}
+
+ion-searchbar {
+  --border-radius: var(--ik-radius);
+  --background: #fff;
+  --box-shadow: var(--ik-shadow-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 0 !important;
+}
+
+ion-badge {
+  border-radius: 99px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+ion-chip {
+  border-radius: 99px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  height: 32px;
+}
+
+ion-modal::part(content) {
+  border-radius: var(--ik-radius-xl) var(--ik-radius-xl) 0 0;
+}
+
+ion-modal.auto-height {
+  --height: auto;
+}
+
+ion-modal.auto-height::part(content) {
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+/* Receipt font */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d3d1c7; border-radius: 4px; }
+
+/* Payment method card */
+.payment-method-card {
+  border: 2px solid transparent;
+  border-radius: var(--ik-radius-lg);
+  padding: 16px;
+  background: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.payment-method-card.selected {
+  border-color: var(--ik-green);
+  background: var(--ik-green-light);
+}
+
+.payment-method-card:active {
+  transform: scale(0.97);
+}
+
+/* Product card */
+.product-card {
+  border-radius: var(--ik-radius);
+  background: #fff;
+  box-shadow: var(--ik-shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+
+.product-card:active {
+  transform: scale(0.96);
+  box-shadow: var(--ik-shadow);
+}
+
+.product-card.out-of-stock {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Cart badge */
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--ik-red);
+  color: #fff;
+  border-radius: 99px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid #fff;
+}
+
+/* Status chips */
+.chip-success { --background: var(--ik-green-light); --color: var(--ik-green-dark); }
+.chip-danger  { --background: var(--ik-red-light);   --color: var(--ik-red); }
+.chip-warning { --background: var(--ik-amber-light);  --color: var(--ik-amber); }
+.chip-info    { --background: var(--ik-blue-light);   --color: var(--ik-blue); }
+.chip-purple  { --background: var(--ik-purple-light); --color: var(--ik-purple); }
+
+/* Printer status */
+.printer-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+.printer-dot.connected    { background: var(--ik-green); box-shadow: 0 0 0 3px var(--ik-green-light); }
+.printer-dot.disconnected { background: #d3d1c7; }
+.printer-dot.scanning     { background: var(--ik-amber); animation: blink 1s infinite; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
