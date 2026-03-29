@@ -1,3 +1,0 @@
-/*! For license information please see 247.7a8b8f9e.chunk.js.LICENSE.txt */
-"use strict";(globalThis.webpackChunkikasir_ionic=globalThis.webpackChunkikasir_ionic||[]).push([[247],{247(e,t,n){n.d(t,{startStatusTap:()=>r});var i=n(309),s=n(721),o=n(384);const r=()=>{const e=window;e.addEventListener("statusTap",()=>{(0,i.gv)(()=>{const t=e.innerWidth,n=e.innerHeight,r=document.elementFromPoint(t/2,n/2);if(!r)return;const a=(0,s.a)(r);a&&new Promise(e=>(0,o.c)(a,e)).then(()=>{(0,i.bN)(async()=>{a.style.setProperty("--overflow","hidden"),await(0,s.s)(a,300),a.style.removeProperty("--overflow")})})})})}}}]);
-//# sourceMappingURL=247.7a8b8f9e.chunk.js.map
