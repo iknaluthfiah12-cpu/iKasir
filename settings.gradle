@@ -1,5 +1,5 @@
 include ':app'
 include ':capacitor-cordova-android-plugins'
-project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
-
-apply from: 'capacitor.settings.gradle'
+project(':app').projectDir = new File('./android/app')
+project(':capacitor-cordova-android-plugins').projectDir = new File('./android/capacitor-cordova-android-plugins/')
+apply from: 'android/capacitor.settings.gradle'
