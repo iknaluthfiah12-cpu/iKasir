@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'iKasir',
   webDir: 'build',
   server: {
-    androidScheme: 'https'
+  androidScheme: 'https'
+}
   },
   plugins: {
     StatusBar: {
