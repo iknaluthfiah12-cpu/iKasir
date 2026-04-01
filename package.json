@@ -1,6 +1,7 @@
 {
   "name": "ikasir-ionic",
   "version": "3.0.0",
+  "homepage": "."
   "private": true,
   "description": "iKasir v3.0 - Ionic + Capacitor POS App with ESC/POS Bluetooth Printing & EDC Payment",
   "scripts": {

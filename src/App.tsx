@@ -4,7 +4,7 @@ import {
   IonIcon, IonLabel, IonModal, IonHeader, IonToolbar, IonTitle,
   IonContent, IonButtons, IonButton, IonToast, setupIonicReact,
 } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
+import { HashRouter } from 'react-router-dom';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import {
   cartOutline, receiptOutline, cubeOutline,
@@ -79,8 +79,8 @@ const App: React.FC = () => {
 
   return (
     <IonApp>
-      <IonReactRouter>
-        <IonTabs>
+      <HashRouter>
+  <IonTabs>
           {/* @ts-ignore */}
           <IonRouterOutlet>
             <Switch>
@@ -173,8 +173,8 @@ const App: React.FC = () => {
               <IonLabel>Lainnya</IonLabel>
             </IonTabButton>
           </IonTabBar>
-        </IonTabs>
-      </IonReactRouter>
+        <HashRouter>
+  <IonTabs>
 
       {/* ── Settings Modal ──────────────────────────────────────────────────── */}
       <IonModal isOpen={showSettings} onDidDismiss={() => setShowSettings(false)} initialBreakpoint={0.85} breakpoints={[0, 0.85]}>
