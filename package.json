@@ -14,6 +14,8 @@
     "cap:run:android": "npx cap run android"
   },
   "dependencies": {
+    "@awesome-cordova-plugins/bluetooth-serial": "^9.1.2",
+    "@awesome-cordova-plugins/core": "^9.1.2",
     "@capacitor/android": "^5.7.8",
     "@capacitor/app": "^5.0.7",
     "@capacitor/core": "^5.7.0",
@@ -23,6 +25,7 @@
     "@capacitor/toast": "^5.0.7",
     "@ionic/react": "^7.1.0",
     "@ionic/react-router": "^7.1.0",
+    "cordova-plugin-bluetooth-serial": "^0.4.7",
     "ionicons": "^7.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -21,6 +21,7 @@ export interface User {
 
 export interface CartItem extends Product {
   qty: number;
+  originalPrice?: number; // harga asli sebelum diubah
 }
 
 export type PaymentMethod = 'tunai' | 'qris' | 'transfer' | 'edc_bca';
@@ -38,7 +39,7 @@ export interface Transaction {
   paymentMethod: PaymentMethod;
   cash?: number;
   kembalian?: number;
-  referenceNo?: string;  // for QRIS / transfer / EDC
+  referenceNo?: string;
   edcApprovalCode?: string;
   bankRef?: string;
   printed: boolean;
@@ -48,6 +49,32 @@ export interface PrinterDevice {
   deviceId: string;
   name: string;
   address: string;
+}
+
+// ── Petty Cash Types ──────────────────────────────────────────────────────────
+export type PettyCashType = 'in' | 'out';
+
+export interface PettyCashEntry {
+  id: number;
+  date: string;
+  type: PettyCashType;   // 'in' = masuk, 'out' = keluar
+  amount: number;
+  description: string;
+  kasir: string;
+  kasirId: number;
+}
+
+export interface CashSession {
+  id: number;
+  date: string;           // tanggal sesi
+  openedBy: string;
+  openedById: number;
+  openedAt: string;       // waktu buka
+  startingCash: number;   // modal awal
+  closedAt?: string;      // waktu tutup
+  closedBy?: string;
+  endingCash?: number;    // uang akhir (dihitung)
+  isOpen: boolean;
 }
 
 // ── Seed Data ─────────────────────────────────────────────────────────────────
@@ -90,32 +117,108 @@ export function storageSave<T>(key: string, val: T): void {
 // ── Data Access ───────────────────────────────────────────────────────────────
 export const DataService = {
   // Session
-  getSession: ()       => storageGet<User | null>('ik_session', null),
+  getSession: ()             => storageGet<User | null>('ik_session', null),
   saveSession: (u: User | null) => storageSave('ik_session', u),
 
   // Users
-  getUsers: ()         => storageGet<User[]>('ik_users', SEED_USERS),
-  saveUsers: (u: User[]) => storageSave('ik_users', u),
+  getUsers: ()               => storageGet<User[]>('ik_users', SEED_USERS),
+  saveUsers: (u: User[])     => storageSave('ik_users', u),
   login: (username: string, password: string): User | null => {
     const users = DataService.getUsers();
     return users.find(u => u.username === username && u.password === password) ?? null;
   },
 
   // Products
-  getProducts: ()       => storageGet<Product[]>('ik_products', SEED_PRODUCTS),
+  getProducts: ()            => storageGet<Product[]>('ik_products', SEED_PRODUCTS),
   saveProducts: (p: Product[]) => storageSave('ik_products', p),
 
   // Transactions
-  getHistory: ()        => storageGet<Transaction[]>('ik_history', []),
+  getHistory: ()             => storageGet<Transaction[]>('ik_history', []),
   addTransaction: (tx: Transaction) => {
     const history = DataService.getHistory();
     storageSave('ik_history', [tx, ...history]);
   },
-  clearHistory: ()      => storageSave('ik_history', []),
+  clearHistory: ()           => storageSave('ik_history', []),
 
   // Printer
-  getSavedPrinter: ()   => storageGet<PrinterDevice | null>('ik_printer', null),
+  getSavedPrinter: ()        => storageGet<PrinterDevice | null>('ik_printer', null),
   savePrinter: (p: PrinterDevice | null) => storageSave('ik_printer', p),
+
+  // ── Cash Session ───────────────────────────────────────────────────────────
+  getCashSessions: ()        => storageGet<CashSession[]>('ik_cash_sessions', []),
+  saveCashSessions: (s: CashSession[]) => storageSave('ik_cash_sessions', s),
+
+  getActiveCashSession: (): CashSession | null => {
+    const sessions = DataService.getCashSessions();
+    return sessions.find(s => s.isOpen) ?? null;
+  },
+
+  openCashSession: (user: User, startingCash: number): CashSession => {
+    const session: CashSession = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('id-ID'),
+      openedBy: user.name,
+      openedById: user.id,
+      openedAt: DataService.nowStr(),
+      startingCash,
+      isOpen: true,
+    };
+    const sessions = DataService.getCashSessions();
+    DataService.saveCashSessions([session, ...sessions]);
+    return session;
+  },
+
+  closeCashSession: (user: User, endingCash: number): void => {
+    const sessions = DataService.getCashSessions();
+    const updated = sessions.map(s =>
+      s.isOpen ? {
+        ...s,
+        isOpen: false,
+        closedAt: DataService.nowStr(),
+        closedBy: user.name,
+        endingCash,
+      } : s
+    );
+    DataService.saveCashSessions(updated);
+  },
+
+  // ── Petty Cash ─────────────────────────────────────────────────────────────
+  getPettyCash: ()           => storageGet<PettyCashEntry[]>('ik_petty_cash', []),
+  savePettyCash: (p: PettyCashEntry[]) => storageSave('ik_petty_cash', p),
+
+  addPettyCash: (entry: Omit<PettyCashEntry, 'id' | 'date'>): PettyCashEntry => {
+    const newEntry: PettyCashEntry = {
+      ...entry,
+      id: Date.now(),
+      date: DataService.nowStr(),
+    };
+    const list = DataService.getPettyCash();
+    DataService.savePettyCash([newEntry, ...list]);
+    return newEntry;
+  },
+
+  deletePettyCash: (id: number): void => {
+    const list = DataService.getPettyCash().filter(e => e.id !== id);
+    DataService.savePettyCash(list);
+  },
+
+  // Hitung saldo kas (starting cash + penjualan tunai + kas masuk - kas keluar)
+  calcCashBalance: (session: CashSession | null): number => {
+    if (!session) return 0;
+    const sessionStart = session.id;
+
+    // Penjualan tunai sejak sesi dibuka
+    const txCash = DataService.getHistory()
+      .filter(tx => tx.id >= sessionStart && tx.paymentMethod === 'tunai')
+      .reduce((a, tx) => a + tx.total, 0);
+
+    // Petty cash sejak sesi dibuka
+    const pc = DataService.getPettyCash().filter(e => e.id >= sessionStart);
+    const pcIn  = pc.filter(e => e.type === 'in').reduce((a, e) => a + e.amount, 0);
+    const pcOut = pc.filter(e => e.type === 'out').reduce((a, e) => a + e.amount, 0);
+
+    return session.startingCash + txCash + pcIn - pcOut;
+  },
 
   // Helpers
   generateInvNo: () => 'INV-' + Math.floor(Math.random() * 90000 + 10000),

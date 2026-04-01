@@ -1,20 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonSearchbar, IonChip, IonLabel, IonBadge, IonIcon,
-  IonFab, IonFabButton, IonToast, IonButtons, IonButton,
+  IonSearchbar, IonChip, IonLabel, IonIcon, IonToast,
+  IonButtons, IonButton,
 } from '@ionic/react';
-import { cartOutline, pricetagOutline, printOutline } from 'ionicons/icons';
-import { DataService, Product, CartItem, TAX_RATE, User } from '../../services/DataService';
+import { cartOutline, pricetagOutline } from 'ionicons/icons';
+import { DataService, Product, CartItem, User } from '../../services/DataService';
 import PaymentModal from '../payment/PaymentModal';
 import ReceiptModal from '../payment/ReceiptModal';
 import CartDrawer   from '../../components/CartDrawer';
 
-interface Props { user: User; }
+interface Props {
+  user: User;
+  taxRate: number;
+}
 
 const fmt = DataService.formatCurrency;
 
-const PosPage: React.FC<Props> = ({ user }) => {
+const PosPage: React.FC<Props> = ({ user, taxRate }) => {
   const [products, setProducts] = useState<Product[]>(() => DataService.getProducts());
   const [cart, setCart]         = useState<CartItem[]>([]);
   const [cat, setCat]           = useState('Semua');
@@ -38,17 +41,17 @@ const PosPage: React.FC<Props> = ({ user }) => {
     [products, cat, search]
   );
 
-  const subtotal   = cart.reduce((a, c) => a + c.price * c.qty, 0);
-  const tax        = subtotal * TAX_RATE;
-  const total      = subtotal + tax;
-  const cartCount  = cart.reduce((a, c) => a + c.qty, 0);
+  const subtotal  = cart.reduce((a, c) => a + c.price * c.qty, 0);
+  const tax       = Math.round(subtotal * taxRate);
+  const total     = subtotal + tax;
+  const cartCount = cart.reduce((a, c) => a + c.qty, 0);
 
   const addToCart = (p: Product) => {
     if (p.stock <= 0) return;
     setCart(prev => {
       const ex = prev.find(c => c.id === p.id);
       if (ex) return prev.map(c => c.id === p.id ? { ...c, qty: c.qty + 1 } : c);
-      return [...prev, { ...p, qty: 1 }];
+      return [...prev, { ...p, qty: 1, originalPrice: p.price }];
     });
     setToast(`${p.icon} ${p.name} ditambahkan`);
   };
@@ -59,10 +62,15 @@ const PosPage: React.FC<Props> = ({ user }) => {
     );
   };
 
+  const changePrice = (id: number, newPrice: number) => {
+    setCart(prev =>
+      prev.map(c => c.id === id ? { ...c, price: newPrice } : c)
+    );
+  };
+
   const clearCart = () => setCart([]);
 
   const handlePaySuccess = (tx: any) => {
-    // Deduct stock
     const updated = products.map(p => {
       const ci = cart.find(c => c.id === p.id);
       return ci ? { ...p, stock: p.stock - ci.qty } : p;
@@ -88,7 +96,16 @@ const PosPage: React.FC<Props> = ({ user }) => {
                 <IonIcon icon={cartOutline} style={{ fontSize: 22 }} />
               </IonButton>
               {cartCount > 0 && (
-                <div className="cart-badge">{cartCount}</div>
+                <div style={{
+                  position: 'absolute', top: 4, right: 4,
+                  background: '#E24B4A', color: '#fff',
+                  borderRadius: '50%', width: 18, height: 18,
+                  fontSize: 10, fontWeight: 800,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  pointerEvents: 'none',
+                }}>
+                  {cartCount > 9 ? '9+' : cartCount}
+                </div>
               )}
             </div>
           </IonButtons>
@@ -141,94 +158,73 @@ const PosPage: React.FC<Props> = ({ user }) => {
             return (
               <div
                 key={p.id}
-                className={`product-card${oos ? ' out-of-stock' : ''}`}
-                onClick={() => addToCart(p)}
+                onClick={() => !oos && addToCart(p)}
+                style={{
+                  background: '#fff', borderRadius: 14, padding: 14,
+                  cursor: oos ? 'not-allowed' : 'pointer',
+                  opacity: oos ? 0.5 : 1,
+                  boxShadow: inCart ? '0 0 0 2px #1D9E75' : '0 1px 6px rgba(0,0,0,0.06)',
+                  position: 'relative', transition: 'all 0.15s',
+                  userSelect: 'none',
+                }}
               >
-                {/* Stock badge */}
+                {/* Low stock badge */}
                 {!oos && p.stock <= 5 && (
                   <div style={{
                     position: 'absolute', top: 8, right: 8,
                     background: '#FAEEDA', color: '#BA7517',
-                    fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 99,
+                    fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 99,
                   }}>
                     Sisa {p.stock}
                   </div>
                 )}
-                {oos && (
-                  <div style={{
-                    position: 'absolute', top: 8, right: 8,
-                    background: '#FCEBEB', color: '#E24B4A',
-                    fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 99,
-                  }}>
-                    Habis
-                  </div>
-                )}
-
-                {/* In-cart indicator */}
+                {/* Cart qty badge */}
                 {inCart && (
                   <div style={{
                     position: 'absolute', top: 8, left: 8,
                     background: '#1D9E75', color: '#fff',
-                    width: 22, height: 22, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 800,
+                    fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 99,
                   }}>
-                    {inCart.qty}
+                    ×{inCart.qty}
                   </div>
                 )}
-
-                <div style={{ padding: 14 }}>
-                  {/* Foto produk — tampil foto jika ada, fallback ke emoji */}
-                  {(p as any).photo ? (
-                    <img
-                      src={(p as any).photo}
-                      alt={p.name}
-                      style={{
-                        width: '100%', height: 90, objectFit: 'cover',
-                        borderRadius: 10, marginBottom: 8, display: 'block',
-                      }}
-                    />
-                  ) : (
-                    <div style={{ fontSize: 36, marginBottom: 8, lineHeight: 1 }}>{p.icon}</div>
-                  )}
-                  <div style={{
-                    fontSize: 13, fontWeight: 700, color: '#2c2c2a',
-                    marginBottom: 4, lineHeight: 1.3,
-                  }}>{p.name}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <IonIcon icon={pricetagOutline} style={{ fontSize: 11, color: '#888780' }} />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1D9E75' }}>
-                      {fmt(p.price)}
-                    </span>
-                  </div>
+                <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 8 }}>{p.icon}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#2c2c2a', marginBottom: 4, lineHeight: 1.3 }}>
+                  {p.name}
+                </div>
+                {oos && (
+                  <div style={{ fontSize: 11, color: '#E24B4A', fontWeight: 700 }}>Habis</div>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                  <IonIcon icon={pricetagOutline} style={{ fontSize: 11, color: '#888780' }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1D9E75' }}>
+                    {fmt(p.price)}
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
-
         {filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: 40, color: '#888780' }}>
             <div style={{ fontSize: 40 }}>🔍</div>
             <div style={{ marginTop: 8, fontSize: 14 }}>Produk tidak ditemukan</div>
           </div>
         )}
-
-        {/* Spacer for FAB */}
-        <div style={{ height: 80 }} />
+        <div style={{ height: 100 }} />
       </IonContent>
 
-      {/* FAB - Pay button when cart is not empty */}
+      {/* FAB - cart summary button */}
       {cart.length > 0 && (
         <div style={{
-          position: 'fixed', bottom: 80, left: 16, right: 16, zIndex: 100,
+          position: 'fixed', bottom: 72, left: 16, right: 16, zIndex: 100,
         }}>
           <button
-            onClick={() => setShowPay(true)}
+            onClick={() => setShowCart(true)}
             style={{
               width: '100%', background: '#1D9E75', color: '#fff',
-              border: 'none', borderRadius: 16, padding: '16px 20px',
-              fontSize: 16, fontWeight: 800, cursor: 'pointer',
+              border: 'none', borderRadius: 16, padding: '14px 20px',
+              fontSize: 15, fontWeight: 800, cursor: 'pointer',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               boxShadow: '0 6px 24px rgba(29,158,117,0.4)',
               fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -236,7 +232,7 @@ const PosPage: React.FC<Props> = ({ user }) => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                background: 'rgba(255,255,255,0.2)', borderRadius: 8,
+                background: 'rgba(255,255,255,0.25)', borderRadius: 8,
                 width: 28, height: 28, display: 'flex', alignItems: 'center',
                 justifyContent: 'center', fontSize: 13, fontWeight: 800,
               }}>
@@ -256,10 +252,12 @@ const PosPage: React.FC<Props> = ({ user }) => {
         subtotal={subtotal}
         tax={tax}
         total={total}
+        taxRate={taxRate}
         onClose={() => setShowCart(false)}
         onChangeQty={changeQty}
+        onChangePrice={changePrice}
         onClear={clearCart}
-        onCheckout={() => { setShowCart(false); setShowPay(true); }}
+        onCheckout={() => { setShowCart(false); setTimeout(() => setShowPay(true), 300); }}
       />
 
       {/* Payment Modal */}
@@ -288,7 +286,7 @@ const PosPage: React.FC<Props> = ({ user }) => {
         duration={1200}
         color="success"
         position="bottom"
-        style={{ '--start': '12px', '--end': '12px', bottom: '130px' }}
+        style={{ '--start': '12px', '--end': '12px', bottom: '140px' }}
         onDidDismiss={() => setToast('')}
       />
     </IonPage>
